@@ -44,24 +44,39 @@
         </li>
       </ul>
       <p v-else>Cargando documentos...</p>
-      <FormularioDoc @documentUploaded="reloadPage" />
-      <div v-if="isEditing" class="edit-panel">
-      <h2>Editar Documento</h2>
-      <form @submit.prevent="saveDocument">
-        <div>
-          <label for="titulo">Título</label>
-          <input type="text" id="titulo" v-model="editableDocument.titulo" required />
+
+      <!-- Botón circular para abrir el modal de carga de documentos -->
+      <button class="add-button" @click="openModal">+</button>
+
+      <!-- Modal para agregar documento -->
+      <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
+        <div class="modal">
+          <h2>Subir Nuevo Documento</h2>
+          <FormularioDoc @documentUploaded="reloadPage" />
+          <button @click="closeModal">Cerrar</button>
         </div>
-        <div>
-          <label for="descripcion">Descripción</label>
-          <input type="text" id="descripcion" v-model="editableDocument.descripcion" required />
+      </div>
+
+      <!-- Modal de edición de documento -->
+      <div v-if="isEditing" class="modal-overlay" @click.self="cancelEdit">
+        <div class="modal">
+          <h2>Editar Documento</h2>
+          <form @submit.prevent="saveDocument">
+            <div>
+              <label for="titulo">Título</label>
+              <input type="text" id="titulo" v-model="editableDocument.titulo" required />
+            </div>
+            <div>
+              <label for="descripcion">Descripción</label>
+              <input type="text" id="descripcion" v-model="editableDocument.descripcion" required />
+            </div>
+            <div class="form-actions">
+              <button type="submit">Guardar Cambios</button>
+              <button type="button" @click="cancelEdit">Cancelar</button>
+            </div>
+          </form>
         </div>
-        <div class="form-actions">
-          <button type="submit">Guardar Cambios</button>
-          <button type="button" @click="cancelEdit">Cancelar</button>
-        </div>
-      </form>
-    </div>
+      </div>
     </div>
   </div>
 </template>
@@ -85,6 +100,7 @@ export default {
       isLoading: false,
       editableDocument: null,
       isEditing: false,
+      isModalOpen: false,  // Estado para abrir/cerrar el modal
     };
   },
   mounted() {
@@ -168,6 +184,16 @@ export default {
       return apiClient;
     },
 
+    // Función para abrir el modal
+    openModal() {
+      this.isModalOpen = true;
+    },
+
+    // Función para cerrar el modal
+    closeModal() {
+      this.isModalOpen = false;
+    },
+
     // Función para iniciar la edición de un documento
     editDocument(document) {
       this.editableDocument = { ...document }; // Cargar datos del documento en el formulario
@@ -185,7 +211,7 @@ export default {
         const apiClient = this.getApiClient();
         await apiClient.patch(`/documentos/${this.editableDocument.id}/`, updatedDocument);
         this.fetchDocuments(); // Recargar los documentos después de la actualización
-        this.cancelEdit(); // Cerrar el panel de edición
+        this.cancelEdit(); // Cerrar el modal de edición
       } catch (error) {
         console.error('Error al guardar los cambios:', error.response ? error.response.data : error);
       }
@@ -257,8 +283,13 @@ h1 {
   color: #42b983;
 }
 
-.list-container{
+.list-container {
   width: 100%;
+  max-width: 1000px; /* Ajusta el ancho máximo del contenedor */
+  margin: 0 auto; /* Centra el contenedor en la pantalla */
+  padding: 20px;
+  background-color: #f4f4f9;
+  border-radius: 8px;
 }
 
 form {
@@ -307,12 +338,10 @@ form button:hover {
 ul {
   list-style-type: none;
   padding: 0;
-  width: 100%;
-  max-width: 1000px; /* Aumentar el ancho a 1000px */
-  margin: 0 auto; /* Centrado automático */
-  background-color: #333; /* Fondo negro */
-  padding: 20px;
-  border-radius: 8px; /* Bordes redondeados */
+  margin: 0;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 li {
@@ -343,30 +372,104 @@ button:hover {
   background-color: darkred;
 }
 
-.edit-panel {
-  margin-top: 20px;
-  width: 100%;
-  max-width: 600px; /* Aumentar el ancho a 600px */
-  margin: 20px auto;
-  background-color: #fff;
+/* Estilo para el modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  color: #333;
-}
-
-.edit-panel form {
+  max-width: 600px;
   width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.edit-panel button {
-  width: 48%;
-  margin-right: 4%;
+.modal .form-actions {
+  display: flex;
+  justify-content: space-between;
 }
 
-.edit-panel .form-actions {
+/* Estilo para el botón de agregar documento */
+.add-document-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #42b983;
+  color: white;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px; /* Aumenté el tamaño del ícono */
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+}
+
+.add-document-button:hover {
+  background-color: #38a369;
+}
+
+/* Estilo para el botón circular */
+.add-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  background-color: #42b983;
+  color: white;
+  border-radius: 50%;
+  font-size: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.add-button:hover {
+  background-color: #38a369;
+}
+
+/* Estilo para el modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal .form-actions {
   display: flex;
   justify-content: space-between;
 }
