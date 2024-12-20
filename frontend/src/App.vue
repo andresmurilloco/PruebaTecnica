@@ -33,6 +33,9 @@
           <p><strong>Estado:</strong> {{ document.estado }}</p>
           <p><strong>Aprobador:</strong> {{ document.aprobador }}</p>
           <a :href="document.archivo" target="_blank">Abrir Documento</a>
+          <!-- Botones para editar y eliminar documentos -->
+          <button @click="editDocument(document.id)">Editar</button>
+          <button @click="deleteDocument(document.id)">Eliminar</button>
         </li>
       </ul>
       <p v-else>Cargando documentos...</p>
@@ -140,6 +143,21 @@ export default {
 
       return apiClient;
     },
+    async editDocument(documentId) {
+      // Función para editar un documento
+      console.log("Editar documento con ID:", documentId);
+      // Aquí agregarás la lógica para editar el documento
+    },
+    async deleteDocument(documentId) {
+      // Función para eliminar un documento
+      try {
+        const apiClient = this.getApiClient();
+        await apiClient.delete(`/documentos/${documentId}/`);
+        this.fetchDocuments(); // Actualizar la lista después de eliminar
+      } catch (error) {
+        console.error('Error al eliminar el documento:', error);
+      }
+    },
   },
 };
 </script>
@@ -208,6 +226,7 @@ button {
   font-size: 16px;
   border: none;
   cursor: pointer;
+  margin-right: 5px;
 }
 
 button:hover {
