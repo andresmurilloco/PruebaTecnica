@@ -6,7 +6,7 @@
     </div>
 
     <!-- Formulario de inicio de sesión -->
-    <div v-else-if="!isAuthenticated">
+    <div v-else-if="!isAuthenticated && !isRegistering">
       <h1>Iniciar sesión</h1>
       <form @submit.prevent="login">
         <div>
@@ -23,6 +23,12 @@
 
       <!-- Botón de registro -->
       <button @click="goToRegister" class="register-button">¿No tienes cuenta? Regístrate</button>
+    </div>
+
+    <!-- Formulario de registro -->
+    <div v-else-if="isRegistering">
+      <FormularioRegistro @registrationSuccess="goToLogin" />
+      <button @click="goToLogin">Volver a Iniciar sesión</button>
     </div>
 
     <!-- Mostrar documentos si el usuario está autenticado -->
@@ -63,15 +69,16 @@
   </div>
 </template>
 
-
 <script>
 import axios from 'axios';
 import FormularioDoc from './components/FormularioDoc.vue';
+import FormularioRegistro from './components/FormularioRegistro.vue';
 
 export default {
   name: 'App',
   components: {
     FormularioDoc,
+    FormularioRegistro,
   },
   data() {
     return {
@@ -84,6 +91,7 @@ export default {
       editableDocument: null,
       isEditing: false,
       isModalOpen: false,  // Estado para abrir/cerrar el modal
+      isRegistering: false, // Estado para mostrar el formulario de registro
     };
   },
   mounted() {
@@ -123,6 +131,12 @@ export default {
       } finally {
         this.isLoading = false;
       }
+    },
+    goToRegister() {
+      this.isRegistering = true; // Cambiar a la vista de registro
+    },
+    goToLogin() {
+      this.isRegistering = false; // Volver al inicio de sesión
     },
     logout() {
       localStorage.removeItem('authToken');
@@ -246,6 +260,7 @@ export default {
   },
 };
 </script>
+
 
 <style>
 #app {
