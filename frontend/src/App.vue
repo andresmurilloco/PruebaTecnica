@@ -23,11 +23,11 @@
     </div>
 
     <!-- Mostrar documentos si el usuario está autenticado -->
-    <div v-else>
+    <div v-else class="list-container">
       <h1>Listado de Documentos</h1>
       <button @click="logout">Cerrar sesión</button>
       <ul v-if="documents.length">
-        <li v-for="document in documents" :key="document.id">
+        <li v-for="document in documents" :key="document.id" class="document-item">
           <p><strong>Título:</strong> {{ document.titulo }}</p>
           <p><strong>Descripción:</strong> {{ document.descripcion }}</p>
           <p><strong>Estado:</strong> {{ document.estado }}</p>
@@ -35,18 +35,17 @@
           <a :href="document.archivo" target="_blank">Abrir Documento</a>
 
           <!-- Botones de edición, eliminación, aprobar y rechazar -->
-          <button @click="editDocument(document)">Editar</button>
-          <button @click="deleteDocument(document.id)">Eliminar</button>
-          <button @click="approveDocument(document.id)">Aprobar</button>
-          <button @click="rejectDocument(document.id)">Rechazar</button>
+          <div class="document-actions">
+            <button @click="editDocument(document)">Editar</button>
+            <button @click="deleteDocument(document.id)">Eliminar</button>
+            <button @click="approveDocument(document.id)">Aprobar</button>
+            <button @click="rejectDocument(document.id)">Rechazar</button>
+          </div>
         </li>
       </ul>
       <p v-else>Cargando documentos...</p>
       <FormularioDoc @documentUploaded="reloadPage" />
-    </div>
-
-    <!-- Panel de edición de documento -->
-    <div v-if="isEditing">
+      <div v-if="isEditing" class="edit-panel">
       <h2>Editar Documento</h2>
       <form @submit.prevent="saveDocument">
         <div>
@@ -57,9 +56,12 @@
           <label for="descripcion">Descripción</label>
           <input type="text" id="descripcion" v-model="editableDocument.descripcion" required />
         </div>
-        <button type="submit">Guardar Cambios</button>
-        <button @click="cancelEdit">Cancelar</button>
+        <div class="form-actions">
+          <button type="submit">Guardar Cambios</button>
+          <button type="button" @click="cancelEdit">Cancelar</button>
+        </div>
       </form>
+    </div>
     </div>
   </div>
 </template>
@@ -239,13 +241,34 @@ export default {
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Alinea el contenido desde la parte superior */
   text-align: center;
   margin-top: 60px;
+  background-color: #f4f4f9;
+  padding: 20px;
+  min-height: 100vh; /* Asegura que el contenedor ocupe toda la altura de la pantalla */
+  width: 100%;
+}
+
+h1 {
+  color: #42b983;
+}
+
+.list-container{
+  width: 100%;
 }
 
 form {
-  max-width: 300px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 600px; /* Aumentar el ancho a 600px */
+  margin: 20px auto; /* Centrado automático */
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 form div {
@@ -255,12 +278,15 @@ form div {
 form label {
   display: block;
   margin-bottom: 5px;
+  font-weight: bold;
 }
 
 form input {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 form button {
@@ -271,6 +297,7 @@ form button {
   font-size: 16px;
   border: none;
   cursor: pointer;
+  border-radius: 4px;
 }
 
 form button:hover {
@@ -280,17 +307,26 @@ form button:hover {
 ul {
   list-style-type: none;
   padding: 0;
+  width: 100%;
+  max-width: 1000px; /* Aumentar el ancho a 1000px */
+  margin: 0 auto; /* Centrado automático */
+  background-color: #333; /* Fondo negro */
+  padding: 20px;
+  border-radius: 8px; /* Bordes redondeados */
 }
 
 li {
   margin: 15px 0;
-  padding: 10px;
+  padding: 20px;
   border: 1px solid #ddd;
   border-radius: 5px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: black;
 }
 
-h1 {
-  color: #42b983;
+.document-actions button {
+  margin-right: 10px;
 }
 
 button {
@@ -300,24 +336,39 @@ button {
   font-size: 16px;
   border: none;
   cursor: pointer;
+  border-radius: 4px;
 }
 
 button:hover {
   background-color: darkred;
 }
 
-/* Estilos del formulario de edición */
-div > form {
+.edit-panel {
+  margin-top: 20px;
+  width: 100%;
+  max-width: 600px; /* Aumentar el ancho a 600px */
+  margin: 20px auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+.edit-panel form {
+  width: 100%;
   max-width: 400px;
   margin: 0 auto;
 }
 
-form button {
-  margin-top: 10px;
-  background-color: #42b983;
+.edit-panel button {
+  width: 48%;
+  margin-right: 4%;
 }
 
-form button:hover {
-  background-color: #38a369;
+.edit-panel .form-actions {
+  display: flex;
+  justify-content: space-between;
 }
+
 </style>
