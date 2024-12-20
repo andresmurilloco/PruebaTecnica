@@ -33,13 +33,31 @@
           <p><strong>Estado:</strong> {{ document.estado }}</p>
           <p><strong>Aprobador:</strong> {{ document.aprobador }}</p>
           <a :href="document.archivo" target="_blank">Abrir Documento</a>
-          <!-- Botones para editar y eliminar documentos -->
-          <button @click="editDocument(document.id)">Editar</button>
+          
+          <!-- Botones de edición y eliminación -->
+          <button @click="editDocument(document)">Editar</button>
           <button @click="deleteDocument(document.id)">Eliminar</button>
         </li>
       </ul>
       <p v-else>Cargando documentos...</p>
       <FormularioDoc />
+    </div>
+
+    <!-- Panel de edición de documento -->
+    <div v-if="isEditing">
+      <h2>Editar Documento</h2>
+      <form @submit.prevent="saveDocument">
+        <div>
+          <label for="titulo">Título</label>
+          <input type="text" id="titulo" v-model="editableDocument.titulo" required />
+        </div>
+        <div>
+          <label for="descripcion">Descripción</label>
+          <input type="text" id="descripcion" v-model="editableDocument.descripcion" required />
+        </div>
+        <button type="submit">Guardar Cambios</button>
+        <button @click="cancelEdit">Cancelar</button>
+      </form>
     </div>
   </div>
 </template>
@@ -61,6 +79,8 @@ export default {
       documents: [],
       loginError: false,
       isLoading: false,
+      editableDocument: null,
+      isEditing: false,
     };
   },
   mounted() {
@@ -143,17 +163,47 @@ export default {
 
       return apiClient;
     },
-    async editDocument(documentId) {
-      // Función para editar un documento
-      console.log("Editar documento con ID:", documentId);
-      // Aquí agregarás la lógica para editar el documento
+
+    // Función para iniciar la edición de un documento
+    editDocument(document) {
+      this.editableDocument = { ...document }; // Cargar datos del documento en el formulario
+      this.isEditing = true; // Activar el modo de edición
     },
+
+    // Función para guardar los cambios realizados en el documento (con PATCH)
+    async saveDocument() {
+  // Crea un nuevo objeto solo con los campos título y descripción
+  const updatedDocument = {
+    titulo: this.editableDocument.titulo,
+    descripcion: this.editableDocument.descripcion
+  };
+
+  console.log('Datos a enviar:', updatedDocument); // Verifica que solo se envíen estos datos
+
+  try {
+    const apiClient = this.getApiClient();
+    // Enviar solo los campos necesarios
+    await apiClient.patch(`/documentos/${this.editableDocument.id}/`, updatedDocument);
+    this.fetchDocuments(); // Recargar los documentos después de la actualización
+    this.cancelEdit(); // Cerrar el panel de edición
+  } catch (error) {
+    console.error('Error al guardar los cambios:', error.response ? error.response.data : error);
+  }
+}
+,
+
+    // Función para cancelar la edición
+    cancelEdit() {
+      this.isEditing = false; // Desactivar el modo de edición
+      this.editableDocument = null; // Limpiar los datos del formulario
+    },
+
+    // Función para eliminar un documento
     async deleteDocument(documentId) {
-      // Función para eliminar un documento
       try {
         const apiClient = this.getApiClient();
         await apiClient.delete(`/documentos/${documentId}/`);
-        this.fetchDocuments(); // Actualizar la lista después de eliminar
+        this.fetchDocuments(); // Recargar la lista de documentos
       } catch (error) {
         console.error('Error al eliminar el documento:', error);
       }
@@ -226,10 +276,24 @@ button {
   font-size: 16px;
   border: none;
   cursor: pointer;
-  margin-right: 5px;
 }
 
 button:hover {
   background-color: darkred;
+}
+
+/* Estilos del formulario de edición */
+div > form {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+form button {
+  margin-top: 10px;
+  background-color: #42b983;
+}
+
+form button:hover {
+  background-color: #38a369;
 }
 </style>
