@@ -1,3 +1,5 @@
+from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from .models import DocumentoPDF
@@ -58,3 +60,14 @@ from django.http import HttpResponse
 
 def home_view(request):
     return HttpResponse("Bienvenido a la API de gestión de documentos PDF.")
+
+class RegistroUsuarioAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = UsuarioPersonalizadoSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({
+                "message": "Usuario registrado exitosamente.",
+                "user": UsuarioPersonalizadoSerializer(user).data
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import DocumentoPDF
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+
 
 class DocumentoPDFSerializer(serializers.ModelSerializer):
     remitente = serializers.StringRelatedField(read_only=True)  # Campo de solo lectura para el email del remitente
@@ -19,6 +21,17 @@ class DocumentoPDFSerializer(serializers.ModelSerializer):
         return value
 
 class UsuarioPersonalizadoSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = get_user_model()
-        fields = ['id', 'email', 'username']
+        fields = ['id', 'email', 'username', 'password']
+
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise ValidationError("La contraseña debe tener al menos 8 caracteres.")
+        return value
+
+    def create(self, validated_data):
+        user = get_user_model().objects.create_user(**validated_data)
+        return user
