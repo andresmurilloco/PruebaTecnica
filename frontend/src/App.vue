@@ -20,6 +20,9 @@
         <button type="submit">Iniciar sesión</button>
         <p v-if="loginError" style="color: red;">Credenciales incorrectas. Intenta nuevamente.</p>
       </form>
+
+      <!-- Botón de registro -->
+      <button @click="goToRegister" class="register-button">¿No tienes cuenta? Regístrate</button>
     </div>
 
     <!-- Mostrar documentos si el usuario está autenticado -->
@@ -56,30 +59,10 @@
           <button @click="closeModal">Cerrar</button>
         </div>
       </div>
-
-      <!-- Modal de edición de documento -->
-      <div v-if="isEditing" class="modal-overlay" @click.self="cancelEdit">
-        <div class="modal">
-          <h2>Editar Documento</h2>
-          <form @submit.prevent="saveDocument">
-            <div>
-              <label for="titulo">Título</label>
-              <input type="text" id="titulo" v-model="editableDocument.titulo" required />
-            </div>
-            <div>
-              <label for="descripcion">Descripción</label>
-              <input type="text" id="descripcion" v-model="editableDocument.descripcion" required />
-            </div>
-            <div class="form-actions">
-              <button type="submit">Guardar Cambios</button>
-              <button type="button" @click="cancelEdit">Cancelar</button>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -519,6 +502,21 @@ form button:hover {
 
 form p {
   color: #e74c3c; /* Color rojo para mensajes de error */
+}
+
+.register-button {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #3498db;
+  color: white;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.register-button:hover {
+  background-color: #2980b9;
 }
 
 
