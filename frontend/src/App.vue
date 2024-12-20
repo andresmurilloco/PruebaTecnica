@@ -474,4 +474,52 @@ button:hover {
   justify-content: space-between;
 }
 
+/* Estilo para el formulario de inicio de sesión */
+form {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #333; /* Color oscuro para el texto */
+}
+
+form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333; /* Asegura que las etiquetas sean legibles */
+}
+
+form input {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  color: #333; /* Color de texto oscuro para mayor contraste */
+}
+
+form button {
+  width: 100%;
+  padding: 10px;
+  background-color: #42b983;
+  color: white;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+form button:hover {
+  background-color: #38a369;
+}
+
+form p {
+  color: #e74c3c; /* Color rojo para mensajes de error */
+}
+
+
 </style>
