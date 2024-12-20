@@ -33,14 +33,16 @@
           <p><strong>Estado:</strong> {{ document.estado }}</p>
           <p><strong>Aprobador:</strong> {{ document.aprobador }}</p>
           <a :href="document.archivo" target="_blank">Abrir Documento</a>
-          
-          <!-- Botones de edición y eliminación -->
+
+          <!-- Botones de edición, eliminación, aprobar y rechazar -->
           <button @click="editDocument(document)">Editar</button>
           <button @click="deleteDocument(document.id)">Eliminar</button>
+          <button @click="approveDocument(document.id)">Aprobar</button>
+          <button @click="rejectDocument(document.id)">Rechazar</button>
         </li>
       </ul>
       <p v-else>Cargando documentos...</p>
-      <FormularioDoc />
+      <FormularioDoc @documentUploaded="reloadPage" />
     </div>
 
     <!-- Panel de edición de documento -->
@@ -114,7 +116,7 @@ export default {
       try {
         const apiClient = this.getApiClient();
         const response = await apiClient.get('/documentos');
-        this.documents = response.data;        
+        this.documents = response.data;
       } catch (error) {
         console.error('Error al obtener documentos:', error);
       } finally {
@@ -172,25 +174,20 @@ export default {
 
     // Función para guardar los cambios realizados en el documento (con PATCH)
     async saveDocument() {
-  // Crea un nuevo objeto solo con los campos título y descripción
-  const updatedDocument = {
-    titulo: this.editableDocument.titulo,
-    descripcion: this.editableDocument.descripcion
-  };
+      const updatedDocument = {
+        titulo: this.editableDocument.titulo,
+        descripcion: this.editableDocument.descripcion
+      };
 
-  console.log('Datos a enviar:', updatedDocument); // Verifica que solo se envíen estos datos
-
-  try {
-    const apiClient = this.getApiClient();
-    // Enviar solo los campos necesarios
-    await apiClient.patch(`/documentos/${this.editableDocument.id}/`, updatedDocument);
-    this.fetchDocuments(); // Recargar los documentos después de la actualización
-    this.cancelEdit(); // Cerrar el panel de edición
-  } catch (error) {
-    console.error('Error al guardar los cambios:', error.response ? error.response.data : error);
-  }
-}
-,
+      try {
+        const apiClient = this.getApiClient();
+        await apiClient.patch(`/documentos/${this.editableDocument.id}/`, updatedDocument);
+        this.fetchDocuments(); // Recargar los documentos después de la actualización
+        this.cancelEdit(); // Cerrar el panel de edición
+      } catch (error) {
+        console.error('Error al guardar los cambios:', error.response ? error.response.data : error);
+      }
+    },
 
     // Función para cancelar la edición
     cancelEdit() {
@@ -208,6 +205,33 @@ export default {
         console.error('Error al eliminar el documento:', error);
       }
     },
+
+    // Función para aprobar un documento
+    async approveDocument(documentId) {
+      try {
+        const apiClient = this.getApiClient();
+        await apiClient.patch(`/documentos/${documentId}/aprobar/`);
+        this.fetchDocuments(); // Recargar documentos después de la aprobación
+      } catch (error) {
+        console.error('Error al aprobar el documento:', error.response ? error.response.data : error);
+      }
+    },
+
+    // Función para rechazar un documento
+    async rejectDocument(documentId) {
+      try {
+        const apiClient = this.getApiClient();
+        await apiClient.patch(`/documentos/${documentId}/rechazar/`);
+        this.fetchDocuments(); // Recargar documentos después del rechazo
+      } catch (error) {
+        console.error('Error al rechazar el documento:', error.response ? error.response.data : error);
+      }
+    },
+
+    // Recargar la página al subir un documento
+    reloadPage() {
+      window.location.reload();
+    }
   },
 };
 </script>
